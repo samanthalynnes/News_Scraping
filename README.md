@@ -2,19 +2,19 @@
 
 ###### An app that lets users scrape articles from the news website: The Daily Skimm. Then they can save/delete articles and save/delete notes about the articles.
 
-![homepage](./images/readme1.png)
+![homepage](./public/images/readme1.png)
 
 ### Where you can scrape
 
-![scrape button](./images/readme2)
+![scrape button](./public/images/readme2)
 
 ###  Then see your saved articles
 
-![saved articles](./images/readme3)
+![saved articles](./public/images/readme3)
 
 ### Add a note to an article
 
-![add note](./images/readme4)
+![add note](./public/images/readme4)
 
 ### Will need to have Mongo running on your computer, run an npm install, and run node server.js.
 
