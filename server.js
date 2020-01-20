@@ -3,29 +3,21 @@ var logger = require("morgan");
 var mongoose = require("mongoose");
 var exphbs = require("express-handlebars");
 
-// Our scraping tools
-// Axios is a promised-based http library, similar to jQuery's Ajax method
-// It works on the client and on the server
 var axios = require("axios");
 var cheerio = require("cheerio");
 var path = require("path");
 
-// Require all models
 var db = require("./models");
 
 var PORT = 3000;
 
-// Initialize Express
 var app = express();
 
-// Configure middleware
-
-// Use morgan logger for logging requests
 app.use(logger("dev"));
-// Parse request body as JSON
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-// Make public a static folder
+
 app.use(express.static("public"));
 
 // Connect to the Mongo DB
@@ -42,19 +34,19 @@ app.set('view engine', 'handlebars');
 
 // Routes
 
-// A GET route for scraping the echoJS website
+// A GET route for scraping the Daily Skimm website
 app.get("/scrape", function (req, res) {
     // First, we grab the body of the html with axios
     axios.get("https://www.theskimm.com/news/daily-skimm").then(function (response) {
         // Then, we load that into cheerio and save it to $ for a shorthand selector
         var $ = cheerio.load(response.data);
 
-        // Now, we grab every h2 within an article tag, and do the following:
+        // Grab the articles, and do the following:
         $("a.card").each(function (i, element) {
             // Save an empty result object
             var result = {};
 
-            // Add the text and href of every link, and save them as properties of the result object
+            // Add the text of every link, and save them as properties of the result object
             result.title = $(this)
                 .children("span")
                 .text();
@@ -82,18 +74,6 @@ app.get("/scrape", function (req, res) {
         res.send("Scrape Complete");
     });
 });
-
-//  Render handlebars home page
-// app.get("/", function (req, res) {
-//     db.Article.find({ saved: false }).lean()
-//         .then(function (error, data) {
-//             var hbsObject = {
-//                 article: data
-//             };
-//             console.log(hbsObject);
-//             res.render("home", hbsObject);
-//         })
-// })
 
 //  Render handlebars home page
 app.get("/", function (req, res) {
