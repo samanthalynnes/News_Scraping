@@ -20,7 +20,7 @@ var ArticleSchema = new Schema({
         type: Boolean,
         default: true
     },
-    summary: {
+    descrip: {
         type: String,
         required: true
     },

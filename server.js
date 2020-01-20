@@ -58,10 +58,10 @@ app.get("/scrape", function (req, res) {
             result.title = $(this)
                 .children("span")
                 .text();
-            result.link = $(this)
+            result.link = ("https://www.theskimm.com/news/daily-skimm") + $(this)
                 // .children("a")
                 .attr("href");
-            result.summary = $(this)
+            result.descrip = $(this)
                 .children("p")
                 .text();
 
@@ -70,7 +70,7 @@ app.get("/scrape", function (req, res) {
                 .then(function (dbArticle) {
                     // View the added result in the console
                     console.log(dbArticle);
-                    // res.redirect("/")
+                    res.redirect("/")
                 })
                 .catch(function (err) {
                     // If an error occurred, log it
