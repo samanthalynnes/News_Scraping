@@ -20,9 +20,9 @@ var ArticleSchema = new Schema({
         type: Boolean,
         default: true
     },
-    descrip: {
+    summary: {
         type: String,
-        require: false
+        required: true
     },
     // `note` is an object that stores a Note id
     // The ref property links the ObjectId to the Note model

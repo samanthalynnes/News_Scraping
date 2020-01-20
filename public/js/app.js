@@ -10,6 +10,12 @@ $("#scrape").on("click", function () {
     })
 });
 
+//Set clicked nav option to active
+$(".navbar-nav li").click(function () {
+    $(".navbar-nav li").removeClass("active");
+    $(this).addClass("active");
+});
+
 // Save article button click
 $(".save").on("click", function () {
     var thisId = $(this).attr("data-id");
@@ -17,7 +23,7 @@ $(".save").on("click", function () {
         method: "POST",
         url: "/articles/save/" + thisId
     }).done(function (data) {
-        windown.location = "/"
+        window.location = "/"
     })
 });
 

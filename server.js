@@ -1,5 +1,5 @@
 var express = require("express");
-// var logger = require("morgan");
+var logger = require("morgan");
 var mongoose = require("mongoose");
 var exphbs = require("express-handlebars");
 
@@ -8,6 +8,7 @@ var exphbs = require("express-handlebars");
 // It works on the client and on the server
 var axios = require("axios");
 var cheerio = require("cheerio");
+var path = require("path");
 
 // Require all models
 var db = require("./models");
@@ -20,7 +21,7 @@ var app = express();
 // Configure middleware
 
 // Use morgan logger for logging requests
-// app.use(logger("dev"));
+app.use(logger("dev"));
 // Parse request body as JSON
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -31,9 +32,12 @@ app.use(express.static("public"));
 // mongoose.connect("mongodb://localhost/unit18Populater", { useNewUrlParser: true });
 var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
 
-mongoose.connect(MONGODB_URI);
+mongoose.connect(MONGODB_URI, { useNewUrlParser: true }, { useUnifiedTopology: true });
 
-app.engine("handlebars", exphbs({ defaultLayout: "main", partialsDir: path.join(__dirname, "/views/layouts/partials") }));
+app.engine("handlebars", exphbs({
+    defaultLayout: "main",
+    partialsDir: path.join(__dirname, "/views/layouts/partials")
+}));
 app.set('view engine', 'handlebars');
 
 // Routes
@@ -46,18 +50,18 @@ app.get("/scrape", function (req, res) {
         var $ = cheerio.load(response.data);
 
         // Now, we grab every h2 within an article tag, and do the following:
-        $("span.card_title").each(function (i, element) {
+        $("a.card").each(function (i, element) {
             // Save an empty result object
             var result = {};
 
             // Add the text and href of every link, and save them as properties of the result object
             result.title = $(this)
-                .children("a")
+                .children("span")
                 .text();
             result.link = $(this)
-                .parent("a")
+                // .children("a")
                 .attr("href");
-            result.descrip = $(this)
+            result.summary = $(this)
                 .children("p")
                 .text();
 
@@ -66,6 +70,7 @@ app.get("/scrape", function (req, res) {
                 .then(function (dbArticle) {
                     // View the added result in the console
                     console.log(dbArticle);
+                    // res.redirect("/")
                 })
                 .catch(function (err) {
                     // If an error occurred, log it
@@ -78,10 +83,45 @@ app.get("/scrape", function (req, res) {
     });
 });
 
+//  Render handlebars home page
+// app.get("/", function (req, res) {
+//     db.Article.find({ saved: false }).lean()
+//         .then(function (error, data) {
+//             var hbsObject = {
+//                 article: data
+//             };
+//             console.log(hbsObject);
+//             res.render("home", hbsObject);
+//         })
+// })
+
+//  Render handlebars home page
+app.get("/", function (req, res) {
+    db.Article.find({ saved: false }).lean()
+        .then(function (article) {
+            var hbsObject = {
+                article
+            };
+            console.log(hbsObject);
+            res.render("home", hbsObject);
+        })
+})
+
+app.get("/saved", function (req, res) {
+    db.Article.find({ saved: true }).lean()
+        .populate("notes")
+        .exec(function (error, articles) {
+            var hbsObject = {
+                article: articles
+            };
+            res.render("saved", hbsObject);
+        });
+});
+
 // Route for getting all Articles from the db
 app.get("/articles", function (req, res) {
     // Grab every document in the Articles collection
-    db.Article.find({})
+    db.Article.find({}).lean()
         .then(function (dbArticle) {
             // If we were able to successfully find Articles, send them back to the client
             res.json(dbArticle);
@@ -106,6 +146,37 @@ app.get("/articles/:id", function (req, res) {
             // If an error occurred, send it to the client
             res.json(err);
         });
+});
+
+//  Route for saving an article
+app.post('/articles/save/:id', function (req, res) {
+    db.Article.findOneAndUpdate({ _id: req.params.id }, { saved: true })
+        .then(function (dbArticle) {
+            res.json(dbArticle);
+        })
+        .catch(function (err) {
+            res.json(err);
+        });
+});
+
+//  Route for deleting an article
+app.post('/articles/delete/:id', function (req, res) {
+    db.Article.findOneAndUpdate({ _id: req.params.id }, { saved: false, notes: [] }, function (err) {
+        if (err) {
+            console.log(err);
+            res.end(err);
+        }
+        else {
+            db.Note.deleteMany({ article: req.params.id })
+                .exec(function (err) {
+                    if (err) {
+                        console.log(err);
+                        res.end(err);
+                    } else
+                        res.send("Article Deleted");
+                });
+        }
+    });
 });
 
 // Route for saving/updating an Article's associated Note
