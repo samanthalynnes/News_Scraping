@@ -6,15 +6,15 @@
 
 ### Where you can scrape
 
-![scrape button](./public/images/readme2)
+![scrape button](./public/images/readme2.png)
 
 ###  Then see your saved articles
 
-![saved articles](./public/images/readme3)
+![saved articles](./public/images/readme3.png)
 
 ### Add a note to an article
 
-![add note](./public/images/readme4)
+![add note](./public/images/readme4.png)
 
 ### Will need to have Mongo running on your computer, run an npm install, and run node server.js.
 
